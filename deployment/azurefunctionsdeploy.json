@@ -23,7 +23,7 @@
         },
         "repoURL": {
             "type": "string",
-            "defaultValue": "https://github.com/ealsur/cosmos-global-distribution-demos.git",
+            "defaultValue": "https://github.com/Azure-Samples/cosmos-multi-region-dotnet.git",
             "metadata": {
                 "description": "The URL for the GitHub repository that contains the project to deploy."
             }
