@@ -44,4 +44,8 @@ Just click in the Deploy to **Azure button** and it will guide you into automati
 
 After the accounts are provisioned you can launch the application using your browser, by going to `https://<name-provided-during-creation>.azurewebsites.net`.
 
+You will see a visual console where you can use the menu to run any of the scenarios:
+
+![Functions console running](./images/functions.gif)
+
 > Everytime a demo scenario is run, containers with 1000 RU/s are provisioned which will generate cost. After the demo finishes, the container is removed **except** for the scenario #4, which provides a visual prompt to remove the containers after Conflict verification has concluded.
