@@ -29,7 +29,7 @@
         }
 
         term.writeln('-----------------------------------------');
-        term.write('Executing...  ');
+        term.writeln('Executing...  ');
         if (description) {
             term.writeln("Creating the required containers and pumping data...");
             term.writeln("Running the scenario...");
