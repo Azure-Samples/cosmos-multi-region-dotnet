@@ -33,16 +33,15 @@ To simplify this process, an [ARM template](./azuredeploy.json) has been provide
 
 Just click in the Deploy to **Azure button** and it will guide you into automatically creating the Azure Function app with all the code deployed on Azure.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcosmos-multi-region-dotnet%2Fdeployment%2Fmaster%2Fazurefunctionsdeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcosmos-multi-region-dotnet%2Fmaster%2Fdeployment%2Fazurefunctionsdeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcosmos-multi-region-dotnet%2Fdeployment%2Fmaster%2Fazurefunctionsdeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcosmos-multi-region-dotnet%2Fmaster%2Fdeployment%2Fazurefunctionsdeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
 ## Initializing the Demos
 
-After the accounts are provisioned you can launch the application using your browser, by going to https://<name-provided-during-creation>.azurewebsites.net.
+After the accounts are provisioned you can launch the application using your browser, by going to `https://<name-provided-during-creation>.azurewebsites.net`.
 
-[!IMPORTANT]
 > Everytime a demo scenario is run, containers with 1000 RU/s are provisioned which will generate cost. After the demo finishes, the container is removed **except** for the scenario #4, which provides a visual prompt to remove the containers after Conflict verification has concluded.
