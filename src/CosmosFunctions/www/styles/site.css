@@ -1,0 +1,21 @@
+﻿body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.title {
+    height: 60px;
+}
+
+.console {
+    height: calc(100vh - 120px);
+}
+
+.console .ms-Grid-col {
+    height: 100%;
+}
+
+.footer {
+    height: 40px;
+}

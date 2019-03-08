@@ -1,0 +1,45 @@
+﻿{
+    "$schema": "http://json.schemastore.org/proxies",
+  "proxies": {
+    "default": {
+      "matchCondition": {
+        "route": "",
+        "methods": [
+          "GET",
+          "OPTIONS"
+        ]
+      },
+      "backendUri": "https://%WEBSITE_HOSTNAME%/api/fileserver?file=index.html"
+    },
+    "scripts": {
+      "matchCondition": {
+        "route": "scripts/{*path}",
+        "methods": [
+          "GET",
+          "OPTIONS"
+        ]
+      },
+      "backendUri": "https://%WEBSITE_HOSTNAME%/api/fileserver?file=scripts/{path}"
+    },
+    "styles": {
+      "matchCondition": {
+        "route": "styles/{*path}",
+        "methods": [
+          "GET",
+          "OPTIONS"
+        ]
+      },
+      "backendUri": "https://%WEBSITE_HOSTNAME%/api/fileserver?file=styles/{path}"
+    },
+    "images": {
+      "matchCondition": {
+        "route": "images/{*path}",
+        "methods": [
+          "GET",
+          "OPTIONS"
+        ]
+      },
+      "backendUri": "https://%WEBSITE_HOSTNAME%/api/fileserver?file=images/{path}"
+    }
+  }
+  }
