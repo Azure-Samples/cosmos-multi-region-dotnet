@@ -39,6 +39,7 @@
     "variables": {
         "functionAppName": "[parameters('appName')]",
         "hostingPlanName": "[concat(parameters('appName'), '-plan')]",
+        "signalRName": "[concat(parameters('appName'), '-signalr')]",
         "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'functions')]",
         "singleRegionEndpoint": "[toLower(concat(parameters('appName'), '-latency-single-region'))]",
         "multiRegionEndpoint": "[toLower(concat(parameters('appName'), '-latency-multi-region'))]",
@@ -50,7 +51,20 @@
         "strongEndpoint": "[toLower(concat(parameters('appName'), '-strong-multi-master'))]",
         "customSyncEndpoint": "[toLower(concat(parameters('appName'), '-custom-multi-master'))]"
     },
-    "resources": [{
+    "resources": [
+    {
+      "apiVersion": "2018-03-01-preview",
+      "location": "West US 2",
+      "name": "[variables('signalRName')]",
+      "properties": {
+        "hostNamePrefix": "[variables('signalRName')]"
+      },
+      "sku": {
+        "capacity": "1",
+        "name": "Free_F1"
+      },
+      "type": "Microsoft.SignalRService/SignalR"
+    }, {
         "type": "Microsoft.Storage/storageAccounts",
         "name": "[variables('storageAccountName')]",
         "apiVersion": "2015-06-15",
@@ -410,12 +424,16 @@
                 }, {
                     "name": "WriteRegion",
                     "value": "West US 2"
+                }, {
+                    "name": "SIGNALR",
+                    "value": "[listkeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalRName')), '2018-03-01').primaryConnectionString]"
                 }]
             }
         },
         "dependsOn": [
             "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
             "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+            "[resourceId('Microsoft.SignalRService/SignalR', variables('signalRName'))]",
             "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('singleRegionEndpoint'))]",
             "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('multiRegionEndpoint'))]",
             "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('eventualEndpoint'))]",
