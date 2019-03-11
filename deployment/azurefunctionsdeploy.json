@@ -407,6 +407,9 @@
                 }, {
                     "name": "UdpPolicyContainer",
                     "value": "customersUdp"
+                }, {
+                    "name": "WriteRegion",
+                    "value": "West US 2"
                 }]
             }
         },
