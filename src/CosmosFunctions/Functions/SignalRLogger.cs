@@ -28,11 +28,14 @@ namespace CosmosGlobalDistributionFunctions
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             this.logger.Log(logLevel, eventId, state, exception, formatter);
-            this.signalRMessagesCollector.AddAsync(new SignalRMessage()
+            if (logLevel.Equals(LogLevel.Information))
             {
-                Target = "console",
-                Arguments = new[] { formatter(state, exception) }
-            }).GetAwaiter().GetResult();
+                this.signalRMessagesCollector.AddAsync(new SignalRMessage()
+                {
+                    Target = "console",
+                    Arguments = new[] { formatter(state, exception) }
+                }).GetAwaiter().GetResult();
+            }
         }
     }
 }
