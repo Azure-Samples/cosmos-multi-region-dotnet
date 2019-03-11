@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using CosmosGlobalDistribution;
 using System.Collections.Generic;
+using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 
 namespace CosmosGlobalDistributionFunctions
 {
@@ -17,16 +18,18 @@ namespace CosmosGlobalDistributionFunctions
         [FunctionName("CustomSynchronizationDemo")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+            ILogger log,
+            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages)
         {
+            SignalRLogger logger = new SignalRLogger(log, signalRMessages);
             List<ResultData> results = null;
             try
             {
-                await customSynchronization.Initialize(log);
+                await customSynchronization.Initialize(logger);
                 await Task.Delay(1000);
-                results = await customSynchronization.RunDemo(log);
+                results = await customSynchronization.RunDemo(logger);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 log.LogError(ex, "Operation failed");
             }

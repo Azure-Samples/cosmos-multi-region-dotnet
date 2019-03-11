@@ -1,8 +1,7 @@
 ﻿'use strict';
 
 (function () {
-    var clock = ['-', '\\', '|', '/'];
-    var clockIndex = 0;
+    var connection = null;
     var working = false;
     var pendingCleanup = false;
     Terminal.applyAddon(fit);
@@ -20,7 +19,6 @@
         }
     });
 
-    var loadingTimeout;
     var callApi = function (apiName, title, description, after) {
         working = true;
         term.writeln(title);
@@ -35,17 +33,7 @@
             term.writeln("Running the scenario...");
         }
 
-        loadingTimeout = setInterval(function () {
-            term.write('\b \b');
-            if (clockIndex === 4) {
-                clockIndex = 0;
-            }
-
-            term.write(clock[clockIndex++]);
-        },1000);
         $.get("/api/" + apiName, {}, function (data) {
-            clearInterval(loadingTimeout);
-
             working = false;
             term.writeln('\b \b');
             term.writeln('Execution concluded.');
@@ -176,4 +164,15 @@
             term.write(key);
         }
     });
+
+    $.get("/api/getsignalrInfo", {}, function (data) {
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl(data.url, { accessTokenFactory: () => data.accessToken })
+            .build();
+        connection.start();
+        console.log(connection);
+        connection.on('console', function (messages) {
+            term.writeln(messages);
+        });
+    }, 'json');
 })();

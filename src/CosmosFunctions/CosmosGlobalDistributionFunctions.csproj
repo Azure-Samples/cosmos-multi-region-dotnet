@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageReference Include="MediaTypeMap.Core" Version="2.3.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.3" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.25" />
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +37,10 @@
     <Content Include="spConflictUDP.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Update="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CosmosGlobalDistribution\CosmosGlobalDistribution.csproj" />
