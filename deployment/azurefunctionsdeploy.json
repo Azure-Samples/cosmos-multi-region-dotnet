@@ -426,7 +426,7 @@
                     "value": "West US 2"
                 }, {
                     "name": "SIGNALR",
-                    "value": "[listkeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalRName')), '2018-03-01').primaryConnectionString]"
+                    "value": "[listkeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalRName')), '2018-03-01-preview').primaryConnectionString]"
                 }]
             }
         },
