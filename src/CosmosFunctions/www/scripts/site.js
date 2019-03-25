@@ -175,7 +175,6 @@
             .withUrl(data.url, { accessTokenFactory: () => data.accessToken })
             .build();
         connection.start();
-        console.log(connection);
         connection.on('console', function (messages) {
             term.writeln(messages);
         });

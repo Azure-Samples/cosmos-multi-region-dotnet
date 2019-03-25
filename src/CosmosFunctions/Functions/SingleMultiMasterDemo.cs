@@ -76,12 +76,12 @@ namespace CosmosGlobalDistributionFunctions
 
         [FunctionName("SingleMultiMasterDemoCleanUp")]
         public static async Task<IActionResult> CleanUp(
-            [TimerTrigger("0 0 */2 * * *")] TimerInfo timerInfo,
+            [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
             ILogger log)
         {
             try
             {
-                if (initialized && DateTime.UtcNow.Subtract(lastExecution).TotalMinutes > 60)
+                if (initialized && DateTime.UtcNow.Subtract(lastExecution).TotalMinutes > 120)
                 {
                     await singleMultiMaster.CleanUp();
                     initialized = false;
