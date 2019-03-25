@@ -18,7 +18,9 @@
                 $.get("/api/CustomSynchronizationDemoInitialize", {}, function () {
                     $.get("/api/SingleMultiMasterDemoInitialize", {}, function () {
                         $.get("/api/SingleMultiRegionDemoInitialize", {}, function () {
-                            initialize = true;
+                            initialized = true;
+                            term.writeln('All containers ready, you can now run any of the demos.');
+                            term.prompt();
                         });
                     });
                 });
@@ -42,7 +44,6 @@
         term.writeln('-----------------------------------------');
         term.writeln('Executing...  ');
         if (description) {
-            term.writeln("Creating the required containers and pumping data...");
             term.writeln("Running the scenario...");
         }
 
