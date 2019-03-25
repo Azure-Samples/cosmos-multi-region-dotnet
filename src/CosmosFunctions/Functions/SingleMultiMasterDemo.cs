@@ -75,7 +75,7 @@ namespace CosmosGlobalDistributionFunctions
         }
 
         [FunctionName("SingleMultiMasterDemoCleanUp")]
-        public static async Task<IActionResult> CleanUp(
+        public static async Task CleanUp(
             [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
             ILogger log)
         {
@@ -91,8 +91,6 @@ namespace CosmosGlobalDistributionFunctions
             {
                 log.LogError(ex, "Operation failed");
             }
-
-            return new OkObjectResult("Cleanup completed successfully.");
         }
     }
 }
