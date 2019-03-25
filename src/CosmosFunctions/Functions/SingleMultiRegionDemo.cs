@@ -14,6 +14,8 @@ namespace CosmosGlobalDistributionFunctions
     public static class SingleMultiRegionDemo
     {
         private static SingleMultiRegion singleMultiRegion = new SingleMultiRegion();
+        private static bool initialized = false;
+        private static DateTime lastExecution = DateTime.MinValue;
 
         [FunctionName("SingleMultiRegionDemo")]
         public static async Task<IActionResult> Run(
@@ -26,21 +28,66 @@ namespace CosmosGlobalDistributionFunctions
             List<ResultData> results = null;
             try
             {
-                await singleMultiRegion.Initialize(logger, context.FunctionAppDirectory);
-                await Task.Delay(1000);
-                await singleMultiRegion.LoadData(logger);
-                results = await singleMultiRegion.RunDemo(logger);
+                if (initialized)
+                {
+                    results = await singleMultiRegion.RunDemo(logger);
+                }
             }
             catch (Exception ex)
             {
                 log.LogError(ex, "Operation failed");
             }
-            finally
-            {
-                await singleMultiRegion.CleanUp();
-            }
 
             return new OkObjectResult(results);
+        }
+
+        [FunctionName("SingleMultiRegionDemoInitialize")]
+        public static async Task<IActionResult> Initialize(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ILogger log,
+            ExecutionContext context,
+            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages)
+        {
+            SignalRLogger logger = new SignalRLogger(log, signalRMessages);
+
+            try
+            {
+                if (!initialized)
+                {
+                    await singleMultiRegion.Initialize(logger, context.FunctionAppDirectory);
+                    await Task.Delay(1000);
+                    await singleMultiRegion.LoadData(logger);
+                    initialized = true;
+                    lastExecution = DateTime.UtcNow;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Operation failed");
+            }
+
+            return new OkObjectResult("Initialized");
+        }
+
+        [FunctionName("SingleMultiRegionDemoCleanUp")]
+        public static async Task<IActionResult> CleanUp(
+            [TimerTrigger("0 0 */2 * * *")] TimerInfo timerInfo,
+            ILogger log)
+        {
+            try
+            {
+                if (initialized && DateTime.UtcNow.Subtract(lastExecution).TotalMinutes > 60)
+                {
+                    await singleMultiRegion.CleanUp();
+                    initialized = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Operation failed");
+            }
+
+            return new OkObjectResult("Cleanup completed successfully.");
         }
     }
 }

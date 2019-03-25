@@ -3,7 +3,7 @@
 (function () {
     var connection = null;
     var working = false;
-    var pendingCleanup = false;
+    var initialized = false;
     Terminal.applyAddon(fit);
     Terminal.applyAddon(webLinks);
     var term = new Terminal({
@@ -11,15 +11,28 @@
     });
     var curr_line = "";
 
-    window.addEventListener("beforeunload", function (e) {
-        if (pendingCleanup) {
-            var confirmationMessage = "Your Conflicts demo resources are still consuming resources, please run 'cleanup' to delete them. Are you sure you want to leave?";
-            (e || window.event).returnValue = confirmationMessage;
-            return confirmationMessage;
-        }
-    });
+    var initialize = function () {
+        term.writeln('Running set up routines...');
+        $.get("/api/ConflictsDemoInitialize", {}, function () {
+            $.get("/api/ConsistencyLatencyDemoInitialize", {}, function () {
+                $.get("/api/CustomSynchronizationDemoInitialize", {}, function () {
+                    $.get("/api/SingleMultiMasterDemoInitialize", {}, function () {
+                        $.get("/api/SingleMultiRegionDemoInitialize", {}, function () {
+                            initialize = true;
+                        });
+                    });
+                });
+            }); 
+        });
+    };
 
     var callApi = function (apiName, title, description, after) {
+        if (!initialized) {
+            term.writeln('Before running any demo, please run the "init" command.');
+            term.prompt();
+            return;
+        }
+
         working = true;
         term.writeln(title);
         if (description) {
@@ -58,6 +71,9 @@
 
     var dispatch = function (command) {
         switch (command) {
+            case "init":
+                initialize();
+                break;
             case "1":
                 callApi("SingleMultiRegionDemo",
                     "Read latency between single region and multi-region replicated accounts",
@@ -79,25 +95,12 @@
                     "This test shows the Last Write Wins and Merge Procedure conflict resolution modes as well as 'Async' mode where conflicts are written to the Conflicts Feed.",
                     function () {
                         term.writeln('Conflicts have been generated in the account, open the Azure Portal ( https://portal.azure.com ) to view them.');
-                        term.writeln('Remember to clean / delete your Conflicts resources by running "cleanup".');
-                        pendingCleanup = true;
                     });
                 break;
             case "5":
                 callApi("CustomSynchronizationDemo",
                     "Custom Synchronization",
                     "This test shows how to implement a custom synchronization between two regions. This allows you to have a lower level of consistency for a database with many replicas across great distances. This scenario shows an account with four regions (West US, West US 2, East US, East US 2) at Session level consistency but with Strong consistency between West US and West US 2. This provides for greater data durability (RPO = 0) without having to use Strong consistency across all regions and over very large distances. This demo includes a separate class that shows a simpler implementation of this you can more easily use without all the timer code.");
-                break;
-            case "cleanup":
-                if (pendingCleanup) {
-                    pendingCleanup = false;
-                    callApi("ConflictsDemoCleanUp",
-                        "Cleaning up Conflict resources");
-                }
-                else {
-                    help();
-                    term.prompt();
-                }
                 break;
             case "cls":
                 term.reset();
@@ -116,6 +119,7 @@
 
     var help = function () {
         term.writeln('Please select one among the available commands:');
+        term.writeln(' init = Initialize required containers');
         term.writeln(' 1 = Single-Region vs. Multi-Region Read Latency');
         term.writeln(' 2 = Consistency vs. Latency');
         term.writeln(' 3 = Latency for Single-Master vs. Multi-Master');

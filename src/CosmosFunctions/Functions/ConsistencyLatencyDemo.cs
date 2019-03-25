@@ -14,6 +14,8 @@ namespace CosmosGlobalDistributionFunctions
     public static class ConsistencyLatencyDemo
     {
         private static ConsistencyLatency consistencyLatency = new ConsistencyLatency();
+        private static bool initialized = false;
+        private static DateTime lastExecution = DateTime.MinValue;
 
         [FunctionName("ConsistencyLatencyDemo")]
         public static async Task<IActionResult> Run(
@@ -25,20 +27,64 @@ namespace CosmosGlobalDistributionFunctions
             List<ResultData> results = null;
             try
             {
-                await consistencyLatency.Initialize(logger);
-                await Task.Delay(1000);
-                results = await consistencyLatency.RunDemo(logger);
+                if (initialized)
+                {
+                    results = await consistencyLatency.RunDemo(logger);
+                    lastExecution = DateTime.UtcNow;
+                }
             }
             catch (Exception ex)
             {
                 log.LogError(ex, "Operation failed");
             }
-            finally
-            {
-                await consistencyLatency.CleanUp();
-            }
 
             return new OkObjectResult(results);
+        }
+
+        [FunctionName("ConsistencyLatencyDemoInitialize")]
+        public static async Task<IActionResult> Initialize(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ILogger log,
+            ExecutionContext context,
+            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages)
+        {
+            SignalRLogger logger = new SignalRLogger(log, signalRMessages);
+            try
+            {
+                if (!initialized)
+                {
+                    await consistencyLatency.Initialize(logger);
+                    initialized = true;
+                    lastExecution = DateTime.UtcNow;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Operation failed");
+            }
+
+            return new OkObjectResult("Initialized");
+        }
+
+        [FunctionName("ConsistencyLatencyDemoCleanUp")]
+        public static async Task<IActionResult> CleanUp(
+            [TimerTrigger("0 0 */2 * * *")] TimerInfo timerInfo,
+            ILogger log)
+        {
+            try
+            {
+                if (initialized && DateTime.UtcNow.Subtract(lastExecution).TotalMinutes > 60)
+                {
+                    await consistencyLatency.CleanUp();
+                    initialized = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Operation failed");
+            }
+
+            return new OkObjectResult("Cleanup completed successfully.");
         }
     }
 }
