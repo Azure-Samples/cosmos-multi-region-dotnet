@@ -1,36 +1,39 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using CosmosGlobalDistribution;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using CosmosGlobalDistribution;
-using System.Collections.Generic;
 using Microsoft.Azure.WebJobs.Extensions.SignalRService;
+using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace CosmosGlobalDistributionFunctions
 {
     public static class SingleMultiRegionDemo
     {
+        private const string DemoName = "SingleMultiRegionDemo";
         private static SingleMultiRegion singleMultiRegion = new SingleMultiRegion();
-        private static bool initialized = false;
-        private static DateTime lastExecution = DateTime.MinValue;
 
         [FunctionName("SingleMultiRegionDemo")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log,
             ExecutionContext context,
-            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages)
+            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages,
+            [Table("GlobalDistributionDemos")] CloudTable cloudTable)
         {
             SignalRLogger logger = new SignalRLogger(log, signalRMessages);
             List<ResultData> results = null;
             try
             {
-                if (initialized)
+                var state = await cloudTable.GetDemoStateAsync(DemoName, false);
+                if (state.Initialized)
                 {
                     results = await singleMultiRegion.RunDemo(logger);
+                    await cloudTable.UpdateDemoState(state);
                 }
             }
             catch (Exception ex)
@@ -46,19 +49,21 @@ namespace CosmosGlobalDistributionFunctions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log,
             ExecutionContext context,
-            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages)
+            [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages,
+            [Table("GlobalDistributionDemos")] CloudTable cloudTable)
         {
             SignalRLogger logger = new SignalRLogger(log, signalRMessages);
 
             try
             {
-                if (!initialized)
+                var state = await cloudTable.GetDemoStateAsync(DemoName);
+                if (!state.Initialized)
                 {
                     await singleMultiRegion.Initialize(logger, context.FunctionAppDirectory);
                     await Task.Delay(1000);
                     await singleMultiRegion.LoadData(logger);
-                    initialized = true;
-                    lastExecution = DateTime.UtcNow;
+                    state.Initialized = true;
+                    await cloudTable.UpdateDemoState(state);
                 }
             }
             catch (Exception ex)
@@ -72,14 +77,18 @@ namespace CosmosGlobalDistributionFunctions
         [FunctionName("SingleMultiRegionDemoCleanUp")]
         public static async Task CleanUp(
             [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
+            [Table("GlobalDistributionDemos")] CloudTable cloudTable,
             ILogger log)
         {
             try
             {
-                if (initialized && DateTime.UtcNow.Subtract(lastExecution).TotalMinutes > 120)
+                var state = await cloudTable.GetDemoStateAsync(DemoName);
+                log.LogInformation($"{DemoName} is initialized {state.Initialized}");
+                if (state.Initialized && DateTime.UtcNow.Subtract(state.LastExecution).TotalMinutes > 120)
                 {
                     await singleMultiRegion.CleanUp();
-                    initialized = false;
+                    state.Initialized = false;
+                    await cloudTable.UpdateDemoState(state);
                 }
             }
             catch (Exception ex)
