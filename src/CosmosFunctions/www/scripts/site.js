@@ -47,20 +47,10 @@
             term.writeln("Running the scenario...");
         }
 
-        $.get("/api/" + apiName, {}, function (data) {
+        $.get("/api/" + apiName, {}, function () {
             working = false;
             term.writeln('\b \b');
             term.writeln('Execution concluded.');
-
-            if (Array.isArray(data)) {
-                for (var i = 0; i < data.length; i++) {
-                    term.writeln(data[i].test);
-                    if (data[i].avgLatency && data[i].avgLatency > 0) {
-                        term.writeln('* Avg. Latency: ' + data[i].avgLatency + ' ms');
-                        term.writeln('* Average RU: ' + data[i].avgRU);
-                    }
-                }
-            }
 
             if (after) {
                 after();

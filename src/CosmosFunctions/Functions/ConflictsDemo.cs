@@ -25,14 +25,13 @@ namespace CosmosGlobalDistributionFunctions
             [SignalR(HubName = "console", ConnectionStringSetting = "SIGNALR")] IAsyncCollector<SignalRMessage> signalRMessages,
             [Table("GlobalDistributionDemos")] CloudTable cloudTable)
         {
-            List<ResultData> results = null;
             SignalRLogger logger = new SignalRLogger(log, signalRMessages);
             try
             {
                 var state = await cloudTable.GetDemoStateAsync(DemoName, false);
                 if (state.Initialized)
                 {
-                    results = await conflicts.RunDemo(logger);
+                    await conflicts.RunDemo(logger);
                     await cloudTable.UpdateDemoState(state);
                 }
             }
@@ -41,7 +40,7 @@ namespace CosmosGlobalDistributionFunctions
                 log.LogError(ex, "Operation failed");
             }
 
-            return new OkObjectResult(results);
+            return new OkResult();
         }
 
         [FunctionName("ConflictsDemoInitialize")]

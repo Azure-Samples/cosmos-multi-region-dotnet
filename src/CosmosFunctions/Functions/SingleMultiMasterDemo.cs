@@ -26,13 +26,12 @@ namespace CosmosGlobalDistributionFunctions
             [Table("GlobalDistributionDemos")] CloudTable cloudTable)
         {
             SignalRLogger logger = new SignalRLogger(log, signalRMessages);
-            List<ResultData> results = null;
             try
             {
                 var state = await cloudTable.GetDemoStateAsync(DemoName, false);
                 if (state.Initialized)
                 {
-                    results = await singleMultiMaster.RunDemo(logger);
+                    await singleMultiMaster.RunDemo(logger);
                     await cloudTable.UpdateDemoState(state);
                 }
             }
@@ -41,7 +40,7 @@ namespace CosmosGlobalDistributionFunctions
                 log.LogError(ex, "Operation failed");
             }
 
-            return new OkObjectResult(results);
+            return new OkResult();
         }
 
         [FunctionName("SingleMultiMasterDemoInitialize")]
