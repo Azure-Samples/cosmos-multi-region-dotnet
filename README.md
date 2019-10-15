@@ -9,7 +9,6 @@ description: "This solution contains a series of benchmarks that demonstrate var
 urlFragment: cosmos-multi-region-dotnet
 ---
 
-
 # Cosmos Global Distribution Demos
 
 ## Introduction
