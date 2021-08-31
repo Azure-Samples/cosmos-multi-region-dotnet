@@ -9,6 +9,9 @@ description: "This solution contains a series of benchmarks that demonstrate var
 urlFragment: cosmos-multi-region-dotnet
 ---
 
+# This repository has been archived. Please refer to the official documentation for global distribution guidance, [Distribute your data globally with Azure Cosmos DB](https://docs.microsoft.com/en-us/azure/cosmos-db/distribute-data-globally)
+
+
 # Cosmos Global Distribution Demos
 
 ## Introduction
@@ -31,9 +34,6 @@ This test shows the difference in read latency for a single-master account (mast
 
 This test shows the Last Write Wins and Merge Procedure conflict resolution modes as well as "Async" mode where conflicts are written to the Conflicts Feed.
 
-### 5. Custom Synchronization
-
-This test shows how to implement a custom synchronization between two regions. This allows you to have a lower level of consistency for a database with many replicas across great distances. This scenario shows an account with four regions (West US, West US 2, East US, East US 2) at Session level consistency but with Strong consistency between West US and West US 2. This provides for greater data durability (RPO = 0) without having to use Strong consistency across all regions and over very large distances. This demo includes a separate class that shows a simpler implementation of this you can more easily use without all the timer code.
 
 ## Provisioning Cosmos DB accounts
 
